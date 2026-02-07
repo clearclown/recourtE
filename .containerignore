@@ -1,0 +1,15 @@
+node_modules
+.git
+.github
+.turbo
+.tanstack
+.nitro
+.output
+.vinxi
+dist
+dist-ssr
+.env
+*.local
+apps/crawler/storage
+dev.turso.db*
+.playwright-mcp

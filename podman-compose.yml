@@ -1,0 +1,19 @@
+# 開発用: podman-compose -f podman-compose.yml up
+# 本番用: podman-compose -f podman-compose.prod.yml up -d
+# バッチ: podman-compose -f podman-compose.batch.yml run --rm crawler
+#         podman-compose -f podman-compose.batch.yml run --rm ingest
+services:
+  frontend-dev:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: frontend-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./apps/frontend/src:/app/apps/frontend/src:z
+      - ./packages/database/src:/app/packages/database/src:z
+      - ./packages/core/src:/app/packages/core/src:z
+      - ./apps/frontend/vite.config.ts:/app/apps/frontend/vite.config.ts:z
+      - ./apps/frontend/public:/app/apps/frontend/public:z
+    env_file: .env

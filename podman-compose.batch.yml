@@ -1,0 +1,19 @@
+services:
+  crawler:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: crawler
+    env_file: .env
+    volumes:
+      - crawler-storage:/app/apps/crawler/storage:z
+
+  ingest:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: ingest
+    env_file: .env
+
+volumes:
+  crawler-storage:
