@@ -58,18 +58,22 @@ export const callGemini = async (config: GeminiConfig, requestBody: unknown) => 
   return response.json();
 };
 
-export const extractStructuredOutput = (response: any) => {
+export const extractStructuredOutput = (response: Record<string, unknown>) => {
   if (response?.output_json) {
     return response.output_json;
   }
 
-  const text = response?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (typeof text !== "string") {
+  const candidates = response?.candidates as Record<string, unknown>[] | undefined;
+  const text = (candidates?.[0]?.content as Record<string, unknown>)?.parts as
+    | Record<string, unknown>[]
+    | undefined;
+  const value = text?.[0]?.text;
+  if (typeof value !== "string") {
     return null;
   }
 
   try {
-    return JSON.parse(text);
+    return JSON.parse(value);
   } catch {
     return null;
   }

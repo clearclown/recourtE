@@ -17,7 +17,7 @@ function JudgesIndex() {
         <div className="space-y-10">
           <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-start">
             <div className="space-y-4">
-              <p className="scv-kicker">Judges</p>
+              <p className="scv-kicker">裁判官</p>
               <h1 className="scv-title">裁判官一覧</h1>
               <p className="scv-lead">
                 登録されている裁判官と、これまでの関与事件数を一覧できます。
@@ -67,13 +67,9 @@ function JudgesIndex() {
                         <a className="scv-link" href={`/judges/${judge.judge_id}`}>
                           {judge.judge_name}
                         </a>
-                        <span className="scv-chip">
-                          {judge.case_count ?? 0} 件
-                        </span>
+                        <span className="scv-chip">{judge.case_count ?? 0} 件</span>
                       </div>
-                      <p className="mt-2 text-xs text-[var(--ink-3)]">
-                        関与事件数
-                      </p>
+                      <p className="mt-2 text-xs text-[var(--ink-3)]">関与事件数</p>
                     </div>
                   ))}
                 </div>
