@@ -1,8 +1,7 @@
+import { case_judges, cases as casesTable, judges, outcomes } from "@recourt/database";
 import { createServerFn } from "@tanstack/react-start";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-
-import { case_judges, cases as casesTable, judges, outcomes } from "@recourt/database";
 
 import { getDatabase } from "./db.server.js";
 
@@ -11,7 +10,7 @@ export const getJudgeDetail = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const db = getDatabase();
     const judge = await db
-      .select({ judge_id: judges.judge_id, judge_name: judges.judge_name })
+      .select({ judge_id: judges.judge_id, judge_name: judges.judge_name, bio: judges.bio })
       .from(judges)
       .where(eq(judges.judge_id, data.judgeId))
       .get();
@@ -28,6 +27,8 @@ export const getJudgeDetail = createServerFn({ method: "GET" })
         court_name: casesTable.court_name,
         result: outcomes.result,
         supplementary_opinion: case_judges.supplementary_opinion,
+        opinion_stance: case_judges.opinion_stance,
+        opinion_summary: case_judges.opinion_summary,
       })
       .from(case_judges)
       .innerJoin(casesTable, eq(casesTable.case_id, case_judges.case_id))

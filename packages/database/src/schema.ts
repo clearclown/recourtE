@@ -67,6 +67,7 @@ export const judges = sqliteTable("judges", {
   judge_id: text("judge_id").primaryKey(),
   judge_name: text("judge_name").notNull(),
   judge_name_normalized: text("judge_name_normalized").notNull(),
+  bio: text("bio"),
   created_at: text("created_at").notNull(),
 });
 

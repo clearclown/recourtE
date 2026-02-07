@@ -5,6 +5,7 @@
   "scripts": {
     "process": "tsx --env-file=.env src/index.ts",
     "retry": "tsx --env-file=.env src/retry.ts",
+    "generate-bios": "tsx --env-file=.env src/generate-judge-bios.ts",
     "build": "echo 'no build yet'",
     "lint": "pnpm -w exec biome check .",
     "format": "pnpm -w exec biome format --write .",
@@ -13,13 +14,16 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.21",
+    "@ai-sdk/openai-compatible": "^2.0.28",
     "@recourt/core": "workspace:*",
     "@recourt/database": "workspace:*",
     "ai": "^6.0.71",
     "drizzle-orm": "catalog:",
+    "pdf-parse": "^2.4.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/pdf-parse": "^1.1.5",
     "tsx": "catalog:"
   }
 }

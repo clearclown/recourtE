@@ -1,0 +1,1 @@
+ALTER TABLE `judges` ADD `bio` text;

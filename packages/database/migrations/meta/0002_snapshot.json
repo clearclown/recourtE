@@ -85,10 +85,7 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "case_judges_case_id_judge_id_pk": {
-          "columns": [
-            "case_id",
-            "judge_id"
-          ],
+          "columns": ["case_id", "judge_id"],
           "name": "case_judges_case_id_judge_id_pk"
         }
       },
@@ -231,12 +228,7 @@
       "indexes": {
         "court_incidents_unique": {
           "name": "court_incidents_unique",
-          "columns": [
-            "incident_era",
-            "incident_year",
-            "category_id",
-            "incident_number"
-          ],
+          "columns": ["incident_era", "incident_year", "category_id", "incident_number"],
           "isUnique": true
         }
       },
@@ -339,9 +331,7 @@
       "indexes": {
         "incident_categories_code_unique": {
           "name": "incident_categories_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -406,9 +396,7 @@
       "indexes": {
         "ingest_jobs_case_id_unique": {
           "name": "ingest_jobs_case_id_unique",
-          "columns": [
-            "case_id"
-          ],
+          "columns": ["case_id"],
           "isUnique": true
         }
       },
@@ -504,9 +492,7 @@
       "indexes": {
         "outcomes_case_id_unique": {
           "name": "outcomes_case_id_unique",
-          "columns": [
-            "case_id"
-          ],
+          "columns": ["case_id"],
           "isUnique": true
         }
       },

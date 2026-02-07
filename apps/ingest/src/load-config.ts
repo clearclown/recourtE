@@ -1,3 +1,5 @@
+import type { AiProvider } from "./pipeline/ai-provider.js";
+
 export interface IngestConfig {
   turso: {
     url: string;
@@ -9,6 +11,13 @@ export interface IngestConfig {
     secretAccessKey: string;
     region: string;
     bucket: string;
+  };
+  ai: {
+    provider: AiProvider;
+    lmstudio?: {
+      baseUrl: string;
+      model: string;
+    };
   };
   gemini: {
     apiKey: string;
@@ -25,6 +34,8 @@ const required = (name: string) => {
 };
 
 export const loadConfig = (): IngestConfig => {
+  const provider = (process.env.AI_PROVIDER ?? "gemini") as AiProvider;
+
   return {
     turso: {
       url: required("TURSO_DATABASE_URL"),
@@ -37,8 +48,19 @@ export const loadConfig = (): IngestConfig => {
       region: process.env.R2_REGION ?? "auto",
       bucket: required("R2_BUCKET"),
     },
+    ai: {
+      provider,
+      ...(provider === "lmstudio"
+        ? {
+            lmstudio: {
+              baseUrl: process.env.LMSTUDIO_BASE_URL ?? "http://localhost:1234/v1",
+              model: process.env.LMSTUDIO_MODEL ?? "",
+            },
+          }
+        : {}),
+    },
     gemini: {
-      apiKey: required("GOOGLE_GENERATIVE_AI_API_KEY"),
+      apiKey: provider === "gemini" ? required("GOOGLE_GENERATIVE_AI_API_KEY") : "",
       prompt:
         process.env.GEMINI_PROMPT ??
         `あなたは最高裁判所の判例読解支援AIです。

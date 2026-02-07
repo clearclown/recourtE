@@ -1,24 +1,23 @@
-import { eq } from "drizzle-orm";
-
 import { createR2Client } from "@recourt/core";
 import {
-  type NewAiOutput,
   ai_outputs,
   cases,
   createDatabase,
+  type NewAiOutput,
   runMigrations,
 } from "@recourt/database";
+import { eq } from "drizzle-orm";
 
 import type { IngestConfig } from "../load-config.js";
 import {
   type AiMetadata,
-  GEMINI_MODEL,
   buildAiRequestPayload,
-  callGemini,
+  callAi,
   storeAiOutput,
   storeAiRequest,
   storeAiResponse,
 } from "./ai-io.js";
+import { getAiModel, getProviderName } from "./ai-provider.js";
 import { findDuplicateCase, reuseExistingAiOutputIfPossible } from "./duplicate-handler.js";
 import { claimJob, loadPendingJobs, markJob } from "./job-runner.js";
 import { normalizeStructuredOutput } from "./output-normalizer.js";
@@ -34,8 +33,11 @@ export const ingestPendingJobs = async (config: IngestConfig) => {
   const r2Client = createR2Client(config.r2);
 
   const pendingJobs = await loadPendingJobs(db);
+  const model = getAiModel();
+  const providerName = getProviderName();
 
   console.log(`[ingest] pending jobs: ${pendingJobs.length}`);
+  console.log(`[ingest] AI プロバイダ: ${providerName}, モデル: ${model.modelId}`);
 
   for (const job of pendingJobs) {
     const startedAt = new Date().toISOString();
@@ -87,15 +89,15 @@ export const ingestPendingJobs = async (config: IngestConfig) => {
         prompt: config.gemini.prompt,
         metadata,
         pdfBytes,
-        model: GEMINI_MODEL.modelId,
+        model: model.modelId,
       });
 
       const requestKey = `requests/${job.case_id}/${startedAt}.json`;
       console.log(`[ingest] store ai request key=${requestKey}`);
       await storeAiRequest(r2Client, config.r2.bucket, requestKey, requestPayload);
 
-      console.log(`[ingest] call gemini model=${GEMINI_MODEL.modelId}`);
-      const aiResult = await callGemini({ config, pdfBytes, metadata });
+      console.log(`[ingest] call ${providerName} model=${model.modelId}`);
+      const aiResult = await callAi({ config, pdfBytes, metadata });
 
       const aiResultJsonData = aiResult.output;
 
