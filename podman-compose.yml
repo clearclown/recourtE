@@ -3,17 +3,34 @@
 # バッチ: podman-compose -f podman-compose.batch.yml run --rm crawler
 #         podman-compose -f podman-compose.batch.yml run --rm ingest
 services:
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    ports:
+      - "0.0.0.0:8080:8080"
+    volumes:
+      - libsql-data:/var/lib/sqld:z
+    environment:
+      - SQLD_NODE=primary
+
   frontend-dev:
     build:
       context: .
       containerfile: Containerfile
       target: frontend-dev
     ports:
-      - "3001:3001"
+      - "0.0.0.0:3001:3001"
     volumes:
       - ./apps/frontend/src:/app/apps/frontend/src:z
       - ./packages/database/src:/app/packages/database/src:z
       - ./packages/core/src:/app/packages/core/src:z
       - ./apps/frontend/vite.config.ts:/app/apps/frontend/vite.config.ts:z
       - ./apps/frontend/public:/app/apps/frontend/public:z
-    env_file: .env
+      - ./packages/database/migrations:/app/packages/database/migrations:z
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
+
+volumes:
+  libsql-data:
