@@ -4,9 +4,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import {
-  type OpinionStance,
   normalizeStance,
+  type OpinionStance,
   parseGlossary,
+  parseOpinionComparison,
   parseStringArray,
 } from "../../lib/case-helpers";
 import { getCaseDetail } from "../../server/cases.functions";
@@ -48,7 +49,16 @@ function CaseDetail() {
     );
   }
 
-  const { case: caseRow, outcome, explanation, judges } = data;
+  const {
+    case: caseRow,
+    outcome,
+    explanation,
+    judges,
+    opinionComparison,
+    news,
+    commentaries,
+  } = data;
+  const comparisonData = parseOpinionComparison(opinionComparison?.comparison_json);
   const issues = parseStringArray(explanation?.issues_json);
   const reasoning = parseStringArray(explanation?.reasoning_json);
   const impactedParties = parseStringArray(explanation?.impacted_parties_json);
@@ -174,6 +184,45 @@ function CaseDetail() {
                 </div>
               )}
             </section>
+
+            {opinionComparison && (
+              <section className="scv-card p-6">
+                <h2 className="text-lg font-semibold mb-4">意見の対立</h2>
+                {opinionComparison.comparison_markdown && (
+                  <div className="scv-markdown text-sm text-[var(--ink-2)]">
+                    {renderMarkdown(opinionComparison.comparison_markdown)}
+                  </div>
+                )}
+                {comparisonData && comparisonData.key_disagreements.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium text-[var(--ink-3)] mb-2">主な対立点</h3>
+                    <ul className="space-y-2">
+                      {comparisonData.key_disagreements.map((point) => (
+                        <li key={point} className="scv-panel p-3 text-sm text-[var(--ink-2)]">
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {comparisonData && comparisonData.dissenting_views.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium text-[var(--ink-3)] mb-2">反対意見</h3>
+                    <div className="space-y-2">
+                      {comparisonData.dissenting_views.map((view) => (
+                        <div
+                          key={view.judge_name}
+                          className="scv-panel p-3 text-sm text-[var(--ink-2)]"
+                        >
+                          <span className="font-medium">{view.judge_name}</span>
+                          <p className="mt-1 text-[var(--ink-3)]">{view.summary}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
           </div>
 
           <aside className="space-y-6">
@@ -249,6 +298,62 @@ function CaseDetail() {
                   ))}
               </div>
             </section>
+
+            {news && news.length > 0 && (
+              <section className="scv-card p-5">
+                <h2 className="text-base font-semibold mb-4">関連ニュース</h2>
+                <div className="space-y-3">
+                  {news.map((item) => (
+                    <div key={item.news_id} className="text-sm">
+                      <a className="scv-link" href={item.url} rel="noreferrer" target="_blank">
+                        {item.title}
+                      </a>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-[var(--ink-3)]">
+                        <span>{item.source}</span>
+                        {item.published_at && <span>{item.published_at}</span>}
+                      </div>
+                      {item.snippet && (
+                        <p className="mt-1 text-xs text-[var(--ink-3)] line-clamp-2">
+                          {item.snippet}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {commentaries && commentaries.length > 0 && (
+              <section className="scv-card p-5">
+                <h2 className="text-base font-semibold mb-4">識者のコメント</h2>
+                <div className="space-y-3">
+                  {commentaries.map((item) => (
+                    <div key={item.commentary_id} className="text-sm">
+                      <a
+                        className="scv-link"
+                        href={item.source_url}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {item.title || item.source_name}
+                      </a>
+                      {item.author && (
+                        <p className="mt-1 text-xs text-[var(--ink-2)]">{item.author}</p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1 text-xs text-[var(--ink-3)]">
+                        <span>{item.source_name}</span>
+                        {item.published_at && <span>{item.published_at}</span>}
+                      </div>
+                      {item.excerpt && (
+                        <p className="mt-1 text-xs text-[var(--ink-3)] line-clamp-3">
+                          {item.excerpt}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="scv-card p-5">
               <h2 className="text-base font-semibold mb-4">関連リンク</h2>

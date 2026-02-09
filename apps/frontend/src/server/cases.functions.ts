@@ -1,9 +1,12 @@
 import {
+  case_commentaries,
   case_explanations,
   case_judges,
+  case_news,
   cases,
   incident_categories,
   judges,
+  opinion_comparisons,
   outcomes,
 } from "@recourt/database";
 import { createServerFn } from "@tanstack/react-start";
@@ -106,10 +109,32 @@ export const getCaseDetail = createServerFn({ method: "GET" })
       .where(eq(case_judges.case_id, data.caseId))
       .all();
 
+    // 意見比較・ニュース・識者コメントを取得
+    const opinionComparison = await db
+      .select()
+      .from(opinion_comparisons)
+      .where(eq(opinion_comparisons.case_id, data.caseId))
+      .get();
+
+    const newsRows = await db
+      .select()
+      .from(case_news)
+      .where(eq(case_news.case_id, data.caseId))
+      .all();
+
+    const commentaryRows = await db
+      .select()
+      .from(case_commentaries)
+      .where(eq(case_commentaries.case_id, data.caseId))
+      .all();
+
     return {
       case: caseRow,
       outcome,
       explanation,
       judges: judgeRows,
+      opinionComparison,
+      news: newsRows,
+      commentaries: commentaryRows,
     };
   });

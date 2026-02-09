@@ -62,6 +62,30 @@ export const buildIncidentId = (search: {
   return `${search.era}${search.year}年(${search.code})${search.number}`;
 };
 
+// 意見比較JSONをパースする
+export interface OpinionComparisonData {
+  majority_view: string;
+  dissenting_views: { judge_name: string; summary: string }[];
+  key_disagreements: string[];
+}
+
+export const parseOpinionComparison = (
+  value: string | null | undefined,
+): OpinionComparisonData | null => {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      majority_view: parsed.majority_view ?? "",
+      dissenting_views: Array.isArray(parsed.dissenting_views) ? parsed.dissenting_views : [],
+      key_disagreements: Array.isArray(parsed.key_disagreements) ? parsed.key_disagreements : [],
+    };
+  } catch {
+    return null;
+  }
+};
+
 // 引用元URLのJSONをパースする
 export const parseSources = (
   value: string | null | undefined,

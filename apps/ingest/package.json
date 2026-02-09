@@ -1,11 +1,16 @@
 {
   "name": "@recourt/ingest",
   "private": true,
+  "type": "module",
   "version": "0.0.0",
   "scripts": {
     "process": "tsx --env-file=.env src/index.ts",
     "retry": "tsx --env-file=.env src/retry.ts",
     "generate-bios": "tsx --env-file=.env src/generate-judge-bios.ts",
+    "enrich-judges": "tsx --env-file=.env src/enrich-judges.ts",
+    "generate-comparisons": "tsx --env-file=.env src/generate-opinion-comparisons.ts",
+    "scrape-news": "tsx --env-file=.env src/scrape-news.ts",
+    "scrape-commentaries": "tsx --env-file=.env src/scrape-commentaries.ts",
     "build": "echo 'no build yet'",
     "lint": "pnpm -w exec biome check .",
     "format": "pnpm -w exec biome format --write .",
@@ -13,11 +18,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.39",
+    "@ai-sdk/deepseek": "^2.0.18",
     "@ai-sdk/google": "^3.0.21",
+    "@ai-sdk/openai": "^3.0.26",
     "@ai-sdk/openai-compatible": "^2.0.28",
+    "@ai-sdk/xai": "^3.0.48",
     "@recourt/core": "workspace:*",
     "@recourt/database": "workspace:*",
     "ai": "^6.0.71",
+    "cheerio": "1.2.0",
     "drizzle-orm": "catalog:",
     "pdf-parse": "^2.4.5",
     "zod": "^4.3.6"
