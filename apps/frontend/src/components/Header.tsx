@@ -8,12 +8,12 @@ export default function Header() {
           <Link to="/cases" search={{ sort: "desc" }} className="scv-brand">
             <img
               src="/saikousai.svg"
-              alt="再考裁"
+              alt="recourtE"
               className="scv-logo"
               loading="eager"
               decoding="async"
             />
-            <span className="sr-only">再考裁</span>
+            <span className="sr-only">recourtE</span>
           </Link>
         </div>
         <nav className="flex items-center gap-6">

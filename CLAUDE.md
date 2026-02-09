@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-"再考裁" (recourtE) — A web app that collects Japan's Supreme Court case data, generates AI explanations via Gemini, and presents them in a user-friendly interface.
+recourtE — A fork of [tukiminya/recourt](https://github.com/tukiminya/recourt). A web app that collects Japan's Supreme Court case data, generates AI explanations, and presents them in a user-friendly interface. Note: The original project name and logo are NOT licensed under MPL-2.0 and require prior permission for use.
 
 ## Tech Stack
 

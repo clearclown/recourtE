@@ -17,6 +17,7 @@ export const getJudgeDetail = createServerFn({ method: "GET" })
         education: judges.education,
         career: judges.career,
         profile: judges.profile,
+        photo_url: judges.photo_url,
         sources_json: judges.sources_json,
       })
       .from(judges)

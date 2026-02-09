@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-
-import { buildIncidentId } from "../../lib/case-helpers";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -12,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { buildIncidentId } from "../../lib/case-helpers";
 import { listCases, listIncidentCategories } from "../../server/cases.functions";
 
 const caseTypeLabels: Record<string, string> = {
@@ -72,7 +71,7 @@ function CasesIndex() {
         <div className="space-y-10">
           <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
             <div className="space-y-4">
-              <p className="scv-kicker">再考裁</p>
+              <p className="scv-kicker">recourtE</p>
               <h1 className="scv-title">判例一覧</h1>
               <p className="scv-lead">判決日で最高裁判例を絞り込み、並び順を変更できます。</p>
               <div className="flex flex-wrap gap-2">

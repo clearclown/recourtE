@@ -36,10 +36,22 @@ function JudgeDetail() {
     <div className="min-h-screen text-[var(--ink-1)] scv-page">
       <div className="scv-container py-12">
         <div className="space-y-8">
-          <div className="space-y-3">
-            <p className="scv-kicker">裁判官詳細</p>
-            <h1 className="scv-title">{data.judge.judge_name}</h1>
-            <p className="text-[var(--ink-3)]">最高裁判例における関与記録を整理します。</p>
+          <div className="flex items-start gap-6">
+            {data.judge.photo_url && (
+              <div className="shrink-0">
+                <img
+                  src={data.judge.photo_url}
+                  alt={`${data.judge.judge_name}の写真`}
+                  className="w-28 h-36 object-cover rounded-lg border border-[var(--ink-5)]"
+                />
+                <p className="text-[10px] text-[var(--ink-4)] mt-1 text-center">写真：最高裁判所</p>
+              </div>
+            )}
+            <div className="space-y-3">
+              <p className="scv-kicker">裁判官詳細</p>
+              <h1 className="scv-title">{data.judge.judge_name}</h1>
+              <p className="text-[var(--ink-3)]">最高裁判例における関与記録を整理します。</p>
+            </div>
           </div>
 
           {data.judge.bio && (
@@ -79,10 +91,11 @@ function JudgeDetail() {
             if (sources.length === 0) return null;
             return (
               <section className="scv-panel p-5">
-                <h2 className="text-base font-semibold mb-3">引用元</h2>
-                <ul className="space-y-1">
+                <h2 className="text-base font-semibold mb-3">引用元・外部リンク</h2>
+                <ul className="space-y-2">
                   {sources.map((source) => (
-                    <li key={source.url} className="text-sm">
+                    <li key={source.url} className="text-sm flex items-center gap-1.5">
+                      <span aria-hidden="true">🔗</span>
                       <a
                         href={source.url}
                         target="_blank"

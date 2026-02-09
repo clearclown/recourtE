@@ -65,8 +65,7 @@ describe("parseGlossary", () => {
   });
 
   it("複数の用語をパースする", () => {
-    const input =
-      '[{"term":"A","explanation":"説明A"},{"term":"B","explanation":"説明B"}]';
+    const input = '[{"term":"A","explanation":"説明A"},{"term":"B","explanation":"説明B"}]';
     const result = parseGlossary(input);
     expect(result).toHaveLength(2);
   });
