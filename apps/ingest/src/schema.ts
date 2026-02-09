@@ -41,5 +41,18 @@ export const structuredOutputSchema = z.object({
   court_name: z.string(),
 });
 
+export const reviewScoreSchema = z.object({
+  quality_score: z.number().int().min(0).max(100),
+  accuracy_score: z.number().int().min(0).max(100),
+  completeness_score: z.number().int().min(0).max(100),
+  clarity_score: z.number().int().min(0).max(100),
+  feedback: z.object({
+    strengths: z.array(z.string()),
+    weaknesses: z.array(z.string()),
+    suggestions: z.array(z.string()),
+  }),
+});
+
 export type CrawlResult = z.infer<typeof crawlResultSchema>;
 export type StructuredOutput = z.infer<typeof structuredOutputSchema>;
+export type ReviewScore = z.infer<typeof reviewScoreSchema>;

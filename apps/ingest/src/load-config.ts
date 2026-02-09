@@ -16,15 +16,12 @@ export interface IngestConfig {
   r2?: R2Config;
   ai: {
     provider: AiProvider;
-    lmstudio?: {
+    model?: string;
+    local?: {
       baseUrl: string;
-      model: string;
     };
   };
-  gemini: {
-    apiKey: string;
-    prompt: string;
-  };
+  prompt: string;
 }
 
 const required = (name: string) => {
@@ -35,8 +32,24 @@ const required = (name: string) => {
   return value;
 };
 
+/** プロバイダーごとに必要なAPIキー環境変数を検証 */
+const validateProviderKey = (provider: AiProvider) => {
+  const keyMap: Partial<Record<AiProvider, string>> = {
+    gemini: "GOOGLE_GENERATIVE_AI_API_KEY",
+    claude: "ANTHROPIC_API_KEY",
+    openai: "OPENAI_API_KEY",
+    deepseek: "DEEPSEEK_API_KEY",
+    grok: "XAI_API_KEY",
+  };
+  const envName = keyMap[provider];
+  if (envName) {
+    required(envName);
+  }
+};
+
 export const loadConfig = (): IngestConfig => {
   const provider = (process.env.AI_PROVIDER ?? "gemini") as AiProvider;
+  validateProviderKey(provider);
 
   return {
     turso: {
@@ -57,20 +70,18 @@ export const loadConfig = (): IngestConfig => {
       : {}),
     ai: {
       provider,
-      ...(provider === "lmstudio"
+      model: process.env.AI_MODEL || undefined,
+      ...(provider === "local"
         ? {
-            lmstudio: {
-              baseUrl: process.env.LMSTUDIO_BASE_URL ?? "http://localhost:1234/v1",
-              model: process.env.LMSTUDIO_MODEL ?? "",
+            local: {
+              baseUrl: process.env.LOCAL_LLM_BASE_URL ?? "http://localhost:1234/v1",
             },
           }
         : {}),
     },
-    gemini: {
-      apiKey: provider === "gemini" ? required("GOOGLE_GENERATIVE_AI_API_KEY") : "",
-      prompt:
-        process.env.GEMINI_PROMPT ??
-        `あなたは最高裁判所の判例読解支援AIです。
+    prompt:
+      process.env.AI_PROMPT ??
+      `あなたは最高裁判所の判例読解支援AIです。
 以下のPDFとメタデータを読み取り、指定のJSON形式で要約を出力してください。
 
 重要な制約:
@@ -117,6 +128,5 @@ export const loadConfig = (): IngestConfig => {
 - outcome.main_text: 主文を原文忠実にMarkdown整形したもの（Bold, Italic, Underlineのみ許可）
 
 必ずJSONのみを出力してください。`,
-    },
   };
 };

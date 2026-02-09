@@ -9,7 +9,7 @@
 import { createUuidV7 } from "@recourt/core";
 import { case_commentaries, cases, createDatabase, runMigrations } from "@recourt/database";
 import { isNotNull } from "drizzle-orm";
-import { search } from "duck-duck-scrape";
+import { SafeSearchType, search } from "duck-duck-scrape";
 
 const DELAY_MS = 1500;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -23,7 +23,10 @@ interface CommentaryItem {
 
 /** DuckDuckGo API で検索して記事情報を取得 */
 const searchCommentaries = async (query: string): Promise<CommentaryItem[]> => {
-  const results = await search(query, { locale: "jp-jp" });
+  const results = await search(query, {
+    safeSearch: SafeSearchType.OFF,
+    locale: "ja-JP",
+  });
 
   return results.results
     .filter((r) => r.url && r.title)

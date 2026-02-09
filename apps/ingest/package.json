@@ -32,6 +32,7 @@
     "drizzle-orm": "catalog:",
     "duck-duck-scrape": "^2.2.7",
     "pdf-parse": "^2.4.5",
+    "undici": "^7.21.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

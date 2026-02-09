@@ -101,7 +101,7 @@ export const ingestPendingJobs = async (config: IngestConfig) => {
 
       if (r2Client && r2Config) {
         const requestPayload = buildAiRequestPayload({
-          prompt: config.gemini.prompt,
+          prompt: config.prompt,
           metadata,
           pdfBytes,
           model: model.modelId,

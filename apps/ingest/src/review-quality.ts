@@ -15,40 +15,13 @@ import {
   createDatabase,
   runMigrations,
 } from "@recourt/database";
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
+
+import { reviewScoreSchema } from "./schema.js";
 
 const DELAY_MS = 1500;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** 採点結果の Zod スキーマ */
-const reviewScoreSchema = z.object({
-  quality_score: z.number().int().min(1).max(100).describe("総合品質スコア (1-100)"),
-  accuracy_score: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .describe("正確性スコア: 法的概念の正確さ、原文との整合性 (1-100)"),
-  completeness_score: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .describe("完全性スコア: 重要論点の網羅度 (1-100)"),
-  clarity_score: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .describe("明瞭性スコア: 一般読者にとっての分かりやすさ (1-100)"),
-  feedback: z.object({
-    strengths: z.array(z.string()).describe("良い点"),
-    weaknesses: z.array(z.string()).describe("改善すべき点"),
-    suggestions: z.array(z.string()).describe("具体的な改善提案"),
-  }),
-});
 
 /** 採点プロンプトを構築 */
 const buildReviewPrompt = (input: {
@@ -98,8 +71,38 @@ ${input.glossaryJson}
 3. **明瞭性 (clarity_score)**: 法律の専門知識がない一般読者が理解できるか、用語解説は適切か
 4. **総合品質 (quality_score)**: 上記を総合した全体的な品質
 
-各スコアは1-100の整数で、70以上が合格水準です。
-厳しく評価してください。曖昧な表現や不正確な法的解釈には低いスコアをつけてください。`;
+各スコアは0-100の整数で、70以上が合格水準です。
+厳しく評価してください。曖昧な表現や不正確な法的解釈には低いスコアをつけてください。
+
+以下の形式のJSONのみを出力してください。余計な説明は不要です。
+{
+  "quality_score": 0-100,
+  "accuracy_score": 0-100,
+  "completeness_score": 0-100,
+  "clarity_score": 0-100,
+  "feedback": {
+    "strengths": ["良い点1", "良い点2"],
+    "weaknesses": ["改善点1", "改善点2"],
+    "suggestions": ["提案1", "提案2"]
+  }
+}
+
+JSONのみを出力してください。`;
+};
+
+/** テキストからJSONを抽出してパースする */
+const extractJson = (text: string): unknown => {
+  // コードブロック内のJSONを優先的に抽出
+  const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    return JSON.parse(codeBlockMatch[1].trim());
+  }
+  // テキスト全体からJSON部分を抽出
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[0]);
+  }
+  throw new Error("レスポンスからJSONを抽出できませんでした");
 };
 
 // メイン処理
@@ -183,11 +186,15 @@ for (const exp of targets) {
       glossaryJson: exp.glossary_json,
     });
 
-    const { object: result } = await generateObject({
+    // テキスト生成→JSONパースモード（構造化出力は使わない）
+    const { text } = await generateText({
       model,
-      schema: reviewScoreSchema,
       prompt,
     });
+
+    // JSONを抽出してZodでバリデーション
+    const rawJson = extractJson(text);
+    const result = reviewScoreSchema.parse(rawJson);
 
     // DBに保存
     await db
@@ -208,10 +215,11 @@ for (const exp of targets) {
       .run();
 
     console.log(
-      `[review] case=${exp.case_id} quality_score=${result.quality_score} accuracy=${result.accuracy_score} completeness=${result.completeness_score} clarity=${result.clarity_score}`,
+      `[review] 完了: case=${exp.case_id} quality=${result.quality_score} accuracy=${result.accuracy_score} completeness=${result.completeness_score} clarity=${result.clarity_score}`,
     );
     successCount++;
 
+    // レート制限を考慮した遅延
     await sleep(DELAY_MS);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
