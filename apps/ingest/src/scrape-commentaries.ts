@@ -11,8 +11,27 @@ import { case_commentaries, cases, createDatabase, runMigrations } from "@recour
 import { isNotNull } from "drizzle-orm";
 import { SafeSearchType, search } from "duck-duck-scrape";
 
-const DELAY_MS = 1500;
+const BASE_DELAY_MS = 4000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** リトライ付き検索（DuckDuckGo レート制限対策） */
+const searchWithRetry = async (query: string, maxRetries = 3): Promise<CommentaryItem[]> => {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await searchCommentaries(query);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("anomaly") && attempt < maxRetries) {
+        const backoff = BASE_DELAY_MS * 2 ** (attempt + 1);
+        console.log(`[commentaries] レート制限、${backoff / 1000}秒待機後にリトライ (${attempt + 1}/${maxRetries})`);
+        await sleep(backoff);
+        continue;
+      }
+      throw err;
+    }
+  }
+  return [];
+};
 
 interface CommentaryItem {
   title: string;
@@ -91,7 +110,8 @@ for (const c of allCases) {
     console.log(`[commentaries] 検索中: "${query}"`);
 
     try {
-      const items = await searchCommentaries(query);
+      await sleep(BASE_DELAY_MS);
+      const items = await searchWithRetry(query);
       console.log(`[commentaries] ${items.length} 件の結果を検出`);
 
       for (const item of items) {
@@ -124,7 +144,6 @@ for (const c of allCases) {
       console.log(`[commentaries] 取得エラー: ${query} — ${err}`);
     }
 
-    await sleep(DELAY_MS);
   }
 }
 
