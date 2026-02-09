@@ -50,26 +50,26 @@ CMD ["npx", "vite", "dev", "--host", "0.0.0.0", "--port", "3001"]
 # ── crawler ───────────────────────────────────────────
 FROM source AS crawler
 # コンテナでは env_file 経由で環境変数が渡されるため、空の .env を作成
-RUN touch /app/.env
+# .containerignore で **/.env を除外しているので、各 workspace にも空 .env が必要
+RUN touch /app/.env /app/apps/crawler/.env
 CMD ["pnpm", "--filter", "@recourt/crawler", "crawl"]
 
 # ── ingest ────────────────────────────────────────────
 FROM source AS ingest
-# コンテナでは env_file 経由で環境変数が渡されるため、空の .env を作成
-RUN touch /app/.env
+RUN touch /app/.env /app/apps/ingest/.env
 CMD ["pnpm", "--filter", "@recourt/ingest", "process"]
 
 # ── enrich-judges ─────────────────────────────────────
 FROM source AS enrich-judges
-RUN touch /app/.env
+RUN touch /app/.env /app/apps/ingest/.env
 CMD ["pnpm", "--filter", "@recourt/ingest", "enrich-judges"]
 
 # ── generate-comparisons ─────────────────────────────
 FROM source AS generate-comparisons
-RUN touch /app/.env
+RUN touch /app/.env /app/apps/ingest/.env
 CMD ["pnpm", "--filter", "@recourt/ingest", "generate-comparisons"]
 
 # ── scrape-news ──────────────────────────────────────
 FROM source AS scrape-news
-RUN touch /app/.env
+RUN touch /app/.env /app/apps/ingest/.env
 CMD ["pnpm", "--filter", "@recourt/ingest", "scrape-news"]

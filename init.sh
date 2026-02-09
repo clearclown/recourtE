@@ -31,14 +31,19 @@ podman-compose $BATCH build crawler ingest enrich-judges generate-comparisons sc
 
 # バッチ実行用関数: podman run --rm でイメージを直接実行
 # podman-compose run は 1.0.6 で depends_on 衝突バグがあるため回避
+# --env-file はコメント行で問題が起きるため、grep でフィルタリング
+ENV_CLEAN=$(mktemp)
+grep -v '^#' .env | grep -v '^\s*$' > "$ENV_CLEAN"
+trap "rm -f $ENV_CLEAN" EXIT
+
 run_batch() {
   local image="$1"
   shift
   podman run --rm \
     --network "$NET" \
-    --env-file .env \
-    -e TURSO_DATABASE_URL=http://libsql:8080 \
-    -e TURSO_AUTH_TOKEN= \
+    --env-file "$ENV_CLEAN" \
+    -e "TURSO_DATABASE_URL=http://libsql:8080" \
+    -e "TURSO_AUTH_TOKEN=" \
     "$image" "$@"
 }
 

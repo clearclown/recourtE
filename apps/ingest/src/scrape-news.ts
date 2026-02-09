@@ -43,7 +43,9 @@ const parseRssItems = (xml: string): NewsItem[] => {
     const link = $(el).find("link").text().trim();
     const source = $(el).find("source").text().trim() || "不明";
     const pubDate = $(el).find("pubDate").text().trim() || null;
-    const description = $(el).find("description").text().trim() || null;
+    const rawDescription = $(el).find("description").text().trim() || null;
+    // RSSのdescriptionにはHTMLタグが含まれるため、テキストのみ抽出
+    const snippet = rawDescription ? cheerio.load(rawDescription).text().trim() || null : null;
 
     if (title && link) {
       items.push({
@@ -51,7 +53,7 @@ const parseRssItems = (xml: string): NewsItem[] => {
         url: link,
         source,
         publishedAt: pubDate ? new Date(pubDate).toISOString() : null,
-        snippet: description,
+        snippet,
       });
     }
   });

@@ -8,7 +8,7 @@
 .vinxi
 dist
 dist-ssr
-.env
+**/.env
 *.local
 apps/crawler/storage
 dev.turso.db*
