@@ -1,0 +1,1 @@
+ALTER TABLE `judges` ADD `photo_url` text;

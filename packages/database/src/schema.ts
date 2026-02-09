@@ -71,6 +71,7 @@ export const judges = sqliteTable("judges", {
   education: text("education"),
   career: text("career"),
   profile: text("profile"),
+  photo_url: text("photo_url"),
   sources_json: text("sources_json"),
   created_at: text("created_at").notNull(),
 });
@@ -111,6 +112,45 @@ export const outcomes = sqliteTable("outcomes", {
   created_at: text("created_at").notNull(),
 });
 
+export const opinion_comparisons = sqliteTable("opinion_comparisons", {
+  case_id: text("case_id").primaryKey(),
+  comparison_json: text("comparison_json").notNull(),
+  comparison_markdown: text("comparison_markdown").notNull(),
+  ai_model: text("ai_model"),
+  created_at: text("created_at").notNull(),
+});
+
+export const case_news = sqliteTable(
+  "case_news",
+  {
+    news_id: text("news_id").primaryKey(),
+    case_id: text("case_id").notNull(),
+    title: text("title").notNull(),
+    url: text("url").notNull().unique(),
+    source: text("source").notNull(),
+    published_at: text("published_at"),
+    snippet: text("snippet"),
+    fetched_at: text("fetched_at").notNull(),
+  },
+  (table) => [index("case_news_case_id_index").on(table.case_id)],
+);
+
+export const case_commentaries = sqliteTable(
+  "case_commentaries",
+  {
+    commentary_id: text("commentary_id").primaryKey(),
+    case_id: text("case_id").notNull(),
+    author: text("author"),
+    source_name: text("source_name").notNull(),
+    source_url: text("source_url").notNull().unique(),
+    title: text("title"),
+    excerpt: text("excerpt"),
+    published_at: text("published_at"),
+    fetched_at: text("fetched_at").notNull(),
+  },
+  (table) => [index("case_commentaries_case_id_index").on(table.case_id)],
+);
+
 export const ai_outputs = sqliteTable("ai_outputs", {
   case_id: text("case_id").notNull(),
   output_r2_key: text("output_r2_key").notNull(),
@@ -148,6 +188,9 @@ export type Database = {
   judges: typeof judges;
   case_judges: typeof case_judges;
   case_explanations: typeof case_explanations;
+  opinion_comparisons: typeof opinion_comparisons;
+  case_news: typeof case_news;
+  case_commentaries: typeof case_commentaries;
   outcomes: typeof outcomes;
   ai_outputs: typeof ai_outputs;
   crawl_ranges: typeof crawl_ranges;
@@ -176,6 +219,15 @@ export type NewCaseExplanation = typeof case_explanations.$inferInsert;
 
 export type OutcomeRow = typeof outcomes.$inferSelect;
 export type NewOutcome = typeof outcomes.$inferInsert;
+
+export type OpinionComparisonRow = typeof opinion_comparisons.$inferSelect;
+export type NewOpinionComparison = typeof opinion_comparisons.$inferInsert;
+
+export type CaseNewsRow = typeof case_news.$inferSelect;
+export type NewCaseNews = typeof case_news.$inferInsert;
+
+export type CaseCommentaryRow = typeof case_commentaries.$inferSelect;
+export type NewCaseCommentary = typeof case_commentaries.$inferInsert;
 
 export type AiOutputRow = typeof ai_outputs.$inferSelect;
 export type NewAiOutput = typeof ai_outputs.$inferInsert;

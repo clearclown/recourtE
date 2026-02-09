@@ -58,3 +58,18 @@ FROM source AS ingest
 # コンテナでは env_file 経由で環境変数が渡されるため、空の .env を作成
 RUN touch /app/.env
 CMD ["pnpm", "--filter", "@recourt/ingest", "process"]
+
+# ── enrich-judges ─────────────────────────────────────
+FROM source AS enrich-judges
+RUN touch /app/.env
+CMD ["pnpm", "--filter", "@recourt/ingest", "enrich-judges"]
+
+# ── generate-comparisons ─────────────────────────────
+FROM source AS generate-comparisons
+RUN touch /app/.env
+CMD ["pnpm", "--filter", "@recourt/ingest", "generate-comparisons"]
+
+# ── scrape-news ──────────────────────────────────────
+FROM source AS scrape-news
+RUN touch /app/.env
+CMD ["pnpm", "--filter", "@recourt/ingest", "scrape-news"]
