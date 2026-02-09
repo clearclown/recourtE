@@ -1,17 +1,19 @@
 import type { AiProvider } from "./pipeline/ai-provider.js";
 
+export interface R2Config {
+  endpoint: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  region: string;
+  bucket: string;
+}
+
 export interface IngestConfig {
   turso: {
     url: string;
     authToken?: string;
   };
-  r2: {
-    endpoint: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-    region: string;
-    bucket: string;
-  };
+  r2?: R2Config;
   ai: {
     provider: AiProvider;
     lmstudio?: {
@@ -41,13 +43,18 @@ export const loadConfig = (): IngestConfig => {
       url: required("TURSO_DATABASE_URL"),
       authToken: process.env.TURSO_AUTH_TOKEN,
     },
-    r2: {
-      endpoint: required("R2_ENDPOINT"),
-      accessKeyId: required("R2_ACCESS_KEY_ID"),
-      secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
-      region: process.env.R2_REGION ?? "auto",
-      bucket: required("R2_BUCKET"),
-    },
+    // R2はオプショナル: 環境変数が未設定ならスキップ
+    ...(process.env.R2_ENDPOINT
+      ? {
+          r2: {
+            endpoint: required("R2_ENDPOINT"),
+            accessKeyId: required("R2_ACCESS_KEY_ID"),
+            secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
+            region: process.env.R2_REGION ?? "auto",
+            bucket: required("R2_BUCKET"),
+          },
+        }
+      : {}),
     ai: {
       provider,
       ...(provider === "lmstudio"

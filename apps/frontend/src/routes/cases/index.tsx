@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 
+import { buildIncidentId } from "../../lib/case-helpers";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -28,13 +29,6 @@ const searchSchema = z.object({
   to: z.string().optional(),
   sort: z.enum(["desc", "asc"]).optional().default("desc"),
 });
-
-const buildIncidentId = (search: z.infer<typeof searchSchema>) => {
-  if (!search.era || !search.year || !search.code || !search.number) {
-    return undefined;
-  }
-  return `${search.era}${search.year}年(${search.code})${search.number}`;
-};
 
 export const Route = createFileRoute("/cases/")({
   validateSearch: (search) => searchSchema.parse(search),

@@ -10,7 +10,15 @@ export const getJudgeDetail = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const db = getDatabase();
     const judge = await db
-      .select({ judge_id: judges.judge_id, judge_name: judges.judge_name, bio: judges.bio })
+      .select({
+        judge_id: judges.judge_id,
+        judge_name: judges.judge_name,
+        bio: judges.bio,
+        education: judges.education,
+        career: judges.career,
+        profile: judges.profile,
+        sources_json: judges.sources_json,
+      })
       .from(judges)
       .where(eq(judges.judge_id, data.judgeId))
       .get();

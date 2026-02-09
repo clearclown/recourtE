@@ -3,6 +3,12 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import {
+  type OpinionStance,
+  normalizeStance,
+  parseGlossary,
+  parseStringArray,
+} from "../../lib/case-helpers";
 import { getCaseDetail } from "../../server/cases.functions";
 
 export const Route = createFileRoute("/cases/$caseId")({
@@ -14,7 +20,6 @@ function CaseDetail() {
   type CaseDetailData = Awaited<ReturnType<typeof getCaseDetail>>;
   const data = Route.useLoaderData() as CaseDetailData;
 
-  type OpinionStance = "agree" | "dissent" | "supplement" | "other" | "unknown";
   const stanceLabels: Record<OpinionStance, string> = {
     agree: "同意",
     dissent: "反対",
@@ -24,54 +29,11 @@ function CaseDetail() {
   };
   const stanceOrder: OpinionStance[] = ["agree", "dissent", "supplement", "other", "unknown"];
 
-  const normalizeStance = (value: string | null | undefined): OpinionStance => {
-    if (value === "agree" || value === "dissent" || value === "supplement" || value === "other") {
-      return value;
-    }
-    return "unknown";
-  };
-
   const renderMarkdown = (value: string | null | undefined) => {
     if (!value) {
       return <p>-</p>;
     }
     return <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>;
-  };
-
-  const parseStringArray = (value: string | null | undefined) => {
-    if (!value) {
-      return [] as string[];
-    }
-    try {
-      const parsed = JSON.parse(value);
-      if (!Array.isArray(parsed)) {
-        return [] as string[];
-      }
-      return parsed.filter((item) => typeof item === "string");
-    } catch {
-      return [] as string[];
-    }
-  };
-
-  const parseGlossary = (value: string | null | undefined) => {
-    if (!value) {
-      return [] as { term: string; explanation: string }[];
-    }
-    try {
-      const parsed = JSON.parse(value);
-      if (!Array.isArray(parsed)) {
-        return [] as { term: string; explanation: string }[];
-      }
-      return parsed.filter(
-        (item) =>
-          item &&
-          typeof item === "object" &&
-          typeof item.term === "string" &&
-          typeof item.explanation === "string",
-      );
-    } catch {
-      return [] as { term: string; explanation: string }[];
-    }
   };
 
   if (!data) {

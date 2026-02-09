@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { parseSources } from "../../lib/case-helpers";
 import { getJudgeDetail } from "../../server/judges.functions";
 
 export const Route = createFileRoute("/judges/$judgeId")({
@@ -47,6 +48,55 @@ function JudgeDetail() {
               <p className="text-sm text-[var(--ink-2)] leading-relaxed">{data.judge.bio}</p>
             </section>
           )}
+
+          {data.judge.education && (
+            <section className="scv-panel p-5">
+              <h2 className="text-base font-semibold mb-3">学歴</h2>
+              <div className="text-sm text-[var(--ink-2)] leading-relaxed whitespace-pre-wrap">
+                {data.judge.education}
+              </div>
+            </section>
+          )}
+
+          {data.judge.career && (
+            <section className="scv-panel p-5">
+              <h2 className="text-base font-semibold mb-3">経歴</h2>
+              <div className="text-sm text-[var(--ink-2)] leading-relaxed whitespace-pre-wrap">
+                {data.judge.career}
+              </div>
+            </section>
+          )}
+
+          {data.judge.profile && (
+            <section className="scv-panel p-5">
+              <h2 className="text-base font-semibold mb-3">プロフィール</h2>
+              <p className="text-sm text-[var(--ink-2)] leading-relaxed">{data.judge.profile}</p>
+            </section>
+          )}
+
+          {(() => {
+            const sources = parseSources(data.judge.sources_json);
+            if (sources.length === 0) return null;
+            return (
+              <section className="scv-panel p-5">
+                <h2 className="text-base font-semibold mb-3">引用元</h2>
+                <ul className="space-y-1">
+                  {sources.map((source) => (
+                    <li key={source.url} className="text-sm">
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="scv-link"
+                      >
+                        {source.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })()}
 
           {data.cases.length > 0 &&
             (() => {

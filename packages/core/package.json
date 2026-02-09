@@ -12,12 +12,15 @@
     "build": "echo 'no build yet'",
     "lint": "pnpm -w exec biome check .",
     "format": "pnpm -w exec biome format --write .",
-    "test": "echo 'no test yet'",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.983.0",
     "@aws-sdk/s3-request-presigner": "^3.983.0",
     "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
   }
 }

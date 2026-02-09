@@ -71,6 +71,13 @@
       "when": 1770487911576,
       "tag": "0009_thick_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1770596575745,
+      "tag": "0010_glorious_karen_page",
+      "breakpoints": true
     }
   ]
 }

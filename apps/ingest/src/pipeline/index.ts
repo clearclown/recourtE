@@ -30,7 +30,12 @@ export const ingestPendingJobs = async (config: IngestConfig) => {
   });
   await runMigrations(db);
 
-  const r2Client = createR2Client(config.r2);
+  const r2Config = config.r2;
+  const r2Client = r2Config ? createR2Client(r2Config) : null;
+
+  if (!r2Config || !r2Client) {
+    console.log("[ingest] R2未設定: ストレージ操作をスキップします");
+  }
 
   const pendingJobs = await loadPendingJobs(db);
   const model = getAiModel();
@@ -59,24 +64,28 @@ export const ingestPendingJobs = async (config: IngestConfig) => {
 
       if (duplicate) {
         console.log(`[ingest] duplicate pdf detected case=${duplicate.case_id}`);
-        const reused = await reuseExistingAiOutputIfPossible({
-          db,
-          r2Client,
-          config,
-          caseId: job.case_id,
-          pdfHash,
-          startedAt,
-          duplicateCaseId: duplicate.case_id,
-        });
-        if (reused) {
-          await markJob(db, job, "done");
-          continue;
+        if (r2Client && r2Config) {
+          const reused = await reuseExistingAiOutputIfPossible({
+            db,
+            r2Client,
+            config,
+            caseId: job.case_id,
+            pdfHash,
+            startedAt,
+            duplicateCaseId: duplicate.case_id,
+          });
+          if (reused) {
+            await markJob(db, job, "done");
+            continue;
+          }
         }
       }
 
-      const pdfKey = buildPdfKey(job);
-      console.log(`[ingest] upload pdf to r2 key=${pdfKey}`);
-      await storePdfToR2(r2Client, config.r2.bucket, pdfKey, pdfBytes);
+      if (r2Client && r2Config) {
+        const pdfKey = buildPdfKey(job);
+        console.log(`[ingest] upload pdf to r2 key=${pdfKey}`);
+        await storePdfToR2(r2Client, r2Config.bucket, pdfKey, pdfBytes);
+      }
 
       await db.update(cases).set({ pdf_hash: pdfHash }).where(eq(cases.case_id, job.case_id)).run();
 
@@ -85,35 +94,40 @@ export const ingestPendingJobs = async (config: IngestConfig) => {
         court_incident_id: job.court_incident_id,
         court_name: job.court_name ?? null,
       };
-      const requestPayload = buildAiRequestPayload({
-        prompt: config.gemini.prompt,
-        metadata,
-        pdfBytes,
-        model: model.modelId,
-      });
 
       const requestKey = `requests/${job.case_id}/${startedAt}.json`;
-      console.log(`[ingest] store ai request key=${requestKey}`);
-      await storeAiRequest(r2Client, config.r2.bucket, requestKey, requestPayload);
+      const responseKey = `responses/${job.case_id}/${startedAt}.json`;
+      const outputKey = `outputs/${job.case_id}/${startedAt}.json`;
+
+      if (r2Client && r2Config) {
+        const requestPayload = buildAiRequestPayload({
+          prompt: config.gemini.prompt,
+          metadata,
+          pdfBytes,
+          model: model.modelId,
+        });
+        console.log(`[ingest] store ai request key=${requestKey}`);
+        await storeAiRequest(r2Client, r2Config.bucket, requestKey, requestPayload);
+      }
 
       console.log(`[ingest] call ${providerName} model=${model.modelId}`);
       const aiResult = await callAi({ config, pdfBytes, metadata });
 
       const aiResultJsonData = aiResult.output;
 
-      const responsePayload = {
-        text: aiResultJsonData,
-        usage: aiResult.usage,
-        warnings: aiResult.warnings,
-        response: aiResult.response,
-      };
-      const responseKey = `responses/${job.case_id}/${startedAt}.json`;
-      console.log(`[ingest] store ai response key=${responseKey}`);
-      await storeAiResponse(r2Client, config.r2.bucket, responseKey, responsePayload);
+      if (r2Client && r2Config) {
+        const responsePayload = {
+          text: aiResultJsonData,
+          usage: aiResult.usage,
+          warnings: aiResult.warnings,
+          response: aiResult.response,
+        };
+        console.log(`[ingest] store ai response key=${responseKey}`);
+        await storeAiResponse(r2Client, r2Config.bucket, responseKey, responsePayload);
 
-      const outputKey = `outputs/${job.case_id}/${startedAt}.json`;
-      console.log(`[ingest] store ai output key=${outputKey}`);
-      await storeAiOutput(r2Client, config.r2.bucket, outputKey, aiResultJsonData);
+        console.log(`[ingest] store ai output key=${outputKey}`);
+        await storeAiOutput(r2Client, r2Config.bucket, outputKey, aiResultJsonData);
+      }
 
       const aiOutputRow: NewAiOutput = {
         case_id: job.case_id,

@@ -42,6 +42,9 @@ export const reuseExistingAiOutputIfPossible = async (input: {
 
   try {
     console.log(`[ingest] reuse ai output from case=${input.duplicateCaseId}`);
+    if (!input.config.r2) {
+      return false;
+    }
     const outputBytes = await getR2Object(
       input.r2Client,
       input.config.r2.bucket,
