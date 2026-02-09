@@ -86,5 +86,17 @@ services:
     depends_on:
       - libsql
 
+  review-quality:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: review-quality
+    env_file: .env
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
+
 volumes:
   libsql-data:

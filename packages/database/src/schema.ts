@@ -181,6 +181,19 @@ export const ingest_jobs = sqliteTable(
   (table) => [index("ingest_jobs_status_index").on(table.status)],
 );
 
+export const ai_review_scores = sqliteTable("ai_review_scores", {
+  review_id: text("review_id").primaryKey(),
+  case_id: text("case_id").notNull(),
+  reviewed_by_model: text("reviewed_by_model").notNull(),
+  generated_by_model: text("generated_by_model").notNull(),
+  quality_score: integer("quality_score").notNull(),
+  accuracy_score: integer("accuracy_score").notNull(),
+  completeness_score: integer("completeness_score").notNull(),
+  clarity_score: integer("clarity_score").notNull(),
+  feedback_json: text("feedback_json").notNull(),
+  reviewed_at: text("reviewed_at").notNull(),
+});
+
 export type Database = {
   cases: typeof cases;
   incident_categories: typeof incident_categories;
@@ -195,6 +208,7 @@ export type Database = {
   ai_outputs: typeof ai_outputs;
   crawl_ranges: typeof crawl_ranges;
   ingest_jobs: typeof ingest_jobs;
+  ai_review_scores: typeof ai_review_scores;
 };
 
 export type CaseRow = typeof cases.$inferSelect;
@@ -238,3 +252,6 @@ export type NewCrawlRange = typeof crawl_ranges.$inferInsert;
 export type IngestJobRow = typeof ingest_jobs.$inferSelect;
 export type NewIngestJob = typeof ingest_jobs.$inferInsert;
 export type IngestJobUpdate = Partial<typeof ingest_jobs.$inferInsert>;
+
+export type AiReviewScoreRow = typeof ai_review_scores.$inferSelect;
+export type NewAiReviewScore = typeof ai_review_scores.$inferInsert;

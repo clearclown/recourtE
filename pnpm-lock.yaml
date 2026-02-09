@@ -169,12 +169,24 @@ importers:
 
   apps/ingest:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^3.0.39
+        version: 3.0.39(zod@4.3.6)
+      '@ai-sdk/deepseek':
+        specifier: ^2.0.18
+        version: 2.0.18(zod@4.3.6)
       '@ai-sdk/google':
         specifier: ^3.0.21
         version: 3.0.21(zod@4.3.6)
+      '@ai-sdk/openai':
+        specifier: ^3.0.26
+        version: 3.0.26(zod@4.3.6)
       '@ai-sdk/openai-compatible':
         specifier: ^2.0.28
         version: 2.0.28(zod@4.3.6)
+      '@ai-sdk/xai':
+        specifier: ^3.0.48
+        version: 3.0.48(zod@4.3.6)
       '@recourt/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -184,9 +196,15 @@ importers:
       ai:
         specifier: ^6.0.71
         version: 6.0.71(zod@4.3.6)
+      cheerio:
+        specifier: 1.2.0
+        version: 1.2.0
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.1(@libsql/client@0.17.0)(@opentelemetry/api@1.9.0)(better-sqlite3@12.6.2)(gel@2.2.0)(kysely@0.28.10)
+      duck-duck-scrape:
+        specifier: ^2.2.7
+        version: 2.2.7
       pdf-parse:
         specifier: ^2.4.5
         version: 2.4.5
@@ -235,6 +253,18 @@ packages:
   '@acemir/cssom@0.9.31':
     resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
 
+  '@ai-sdk/anthropic@3.0.39':
+    resolution: {integrity: sha512-OZXS78H3hgJ31YVlNCLQcM67D7hP5vQyDBGVwBuE20FopQqTRSAQY1nMBPe6aUzuoNthTfROIXtIqqX9Fv65Ww==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/deepseek@2.0.18':
+    resolution: {integrity: sha512-AwtmFm7acnCsz3z82Yu5QKklSZz+cBwtxrc2hbw47tPF/38xr1zX3Vf/pP627EHwWkLV18UWivIxg0SHPP2w3A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/gateway@3.0.34':
     resolution: {integrity: sha512-ZS1dWai5DINQOv3bpNi3ua9+yt3jnRaux3CwEr/ai9qETp6T+2wcpZyw+0jUHo1He/Lznw//AQh4zhdwHnTWrg==}
     engines: {node: '>=18'}
@@ -249,6 +279,12 @@ packages:
 
   '@ai-sdk/openai-compatible@2.0.28':
     resolution: {integrity: sha512-WzDnU0B13FMSSupDtm2lksFZvWGXnOfhG5S0HoPI0pkX5uVkr6N1UTATMyVaxLCG0MRkMhXCjkg4NXgEbb330Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@3.0.26':
+    resolution: {integrity: sha512-W/hiwxIfG29IO0Fob1HwWpFssMsNrxWoX8A7DwNGOtKArDBmJNuGzQeU/k0Fnh8WyvZEnfxkjO4oXkSXfVBayg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -272,6 +308,12 @@ packages:
   '@ai-sdk/provider@3.0.8':
     resolution: {integrity: sha512-oGMAgGoQdBXbZqNG0Ze56CHjDZ1IDYOwGYxYjO5KLSlz5HiNQ9udIXsPZ61VWaHGZ5XW/jyjmr6t2xz2jGVwbQ==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/xai@3.0.48':
+    resolution: {integrity: sha512-fUefjg7TwngHUtv0s+8j+GSPBiQRSETOPpICpaubz0CDNj0inBw/bZ6DKskQol7O20BIcoz0eKweedtC+F5iyQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
 
   '@apify/consts@2.49.0':
     resolution: {integrity: sha512-sJZqlVqYkHXBb73cW+JClkSoYsqyOE//SCd53eAO6wTHsGvytIzXyzOj80346I+av1wQnRrAP7X2ABVz5QWPCw==}
@@ -3748,6 +3790,9 @@ packages:
       sqlite3:
         optional: true
 
+  duck-duck-scrape@2.2.7:
+    resolution: {integrity: sha512-BEcglwnfx5puJl90KQfX+Q2q5vCguqyMpZcSRPBWk8OY55qWwV93+E+7DbIkrGDW4qkqPfUvtOUdi0lXz6lEMQ==}
+
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
 
@@ -4031,6 +4076,9 @@ packages:
   html-encoding-sniffer@6.0.0:
     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+
+  html-entities@2.6.0:
+    resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
 
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
@@ -4560,6 +4608,11 @@ packages:
 
   napi-build-utils@2.0.0:
     resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
+
+  needle@3.3.1:
+    resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==}
+    engines: {node: '>= 4.4.x'}
+    hasBin: true
 
   nf3@0.3.6:
     resolution: {integrity: sha512-/XRUUILTAyuy1XunyVQuqGp8aEmZ2TfRTn8Rji+FA4xqv20qzL4jV7Reqbuey2XucKgPeRVcEYGScmJM0UnB6Q==}
@@ -5658,6 +5711,18 @@ snapshots:
 
   '@acemir/cssom@0.9.31': {}
 
+  '@ai-sdk/anthropic@3.0.39(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.14(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/deepseek@2.0.18(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.14(zod@4.3.6)
+      zod: 4.3.6
+
   '@ai-sdk/gateway@3.0.34(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.7
@@ -5672,6 +5737,12 @@ snapshots:
       zod: 4.3.6
 
   '@ai-sdk/openai-compatible@2.0.28(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.14(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/openai@3.0.26(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.14(zod@4.3.6)
@@ -5698,6 +5769,13 @@ snapshots:
   '@ai-sdk/provider@3.0.8':
     dependencies:
       json-schema: 0.4.0
+
+  '@ai-sdk/xai@3.0.48(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 2.0.28(zod@4.3.6)
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.14(zod@4.3.6)
+      zod: 4.3.6
 
   '@apify/consts@2.49.0': {}
 
@@ -9497,6 +9575,11 @@ snapshots:
       gel: 2.2.0
       kysely: 0.28.10
 
+  duck-duck-scrape@2.2.7:
+    dependencies:
+      html-entities: 2.6.0
+      needle: 3.3.1
+
   duplexer@0.1.2: {}
 
   electron-to-chromium@1.5.279: {}
@@ -9865,6 +9948,8 @@ snapshots:
       '@exodus/bytes': 1.11.0
     transitivePeerDependencies:
       - '@noble/hashes'
+
+  html-entities@2.6.0: {}
 
   html-escaper@3.0.3: {}
 
@@ -10623,6 +10708,11 @@ snapshots:
 
   napi-build-utils@2.0.0:
     optional: true
+
+  needle@3.3.1:
+    dependencies:
+      iconv-lite: 0.6.3
+      sax: 1.4.4
 
   nf3@0.3.6: {}
 

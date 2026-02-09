@@ -41,6 +41,7 @@ run_batch() {
   shift
   podman run --rm \
     --network "$NET" \
+    --add-host=host.containers.internal:host-gateway \
     --env-file "$ENV_CLEAN" \
     -e "TURSO_DATABASE_URL=http://libsql:8080" \
     -e "TURSO_AUTH_TOKEN=" \

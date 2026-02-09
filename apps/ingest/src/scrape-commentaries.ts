@@ -1,31 +1,18 @@
 /**
  * 識者コメント収集スクリプト
  *
- * Google検索結果をスクレイピングして、各事件に関する弁護士・専門家の
+ * DuckDuckGo API を使って、各事件に関する弁護士・専門家の
  * 解説記事を収集し、case_commentaries テーブルに保存する。
  *
  * 使い方: pnpm --filter @recourt/ingest scrape-commentaries
  */
 import { createUuidV7 } from "@recourt/core";
 import { case_commentaries, cases, createDatabase, runMigrations } from "@recourt/database";
-import * as cheerio from "cheerio";
 import { isNotNull } from "drizzle-orm";
+import { search } from "duck-duck-scrape";
 
-const DELAY_MS = 2000;
+const DELAY_MS = 1500;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-const USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-
-/** Google検索URLを構築 */
-const buildSearchUrl = (query: string): string => {
-  const params = new URLSearchParams({
-    q: query,
-    hl: "ja",
-    num: "5",
-  });
-  return `https://www.google.com/search?${params}`;
-};
 
 interface CommentaryItem {
   title: string;
@@ -34,53 +21,31 @@ interface CommentaryItem {
   excerpt: string | null;
 }
 
-/** Google検索結果HTMLをパースして記事情報を抽出 */
-const parseSearchResults = (html: string): CommentaryItem[] => {
-  const $ = cheerio.load(html);
-  const items: CommentaryItem[] = [];
+/** DuckDuckGo API で検索して記事情報を取得 */
+const searchCommentaries = async (query: string): Promise<CommentaryItem[]> => {
+  const results = await search(query, { locale: "jp-jp" });
 
-  // Google検索結果のリンクパターン: a[href^="/url?q="]
-  $('a[href^="/url?q="]').each((_, el) => {
-    const rawHref = $(el).attr("href") ?? "";
-    // /url?q=ACTUAL_URL&sa=... からURLを抽出
-    const urlMatch = rawHref.match(/\/url\?q=([^&]+)/);
-    if (!urlMatch) return;
+  return results.results
+    .filter((r) => r.url && r.title)
+    .map((r) => {
+      let sourceName = "不明";
+      try {
+        sourceName = new URL(r.url).hostname.replace(/^www\./, "");
+      } catch {
+        // URLパース失敗時はデフォルト値のまま
+      }
 
-    const url = decodeURIComponent(urlMatch[1]);
-    // Google自身のURLやキャッシュ等を除外
-    if (url.includes("google.com") || url.includes("webcache.")) return;
+      // HTMLタグを除去
+      const rawSnippet = r.description ?? "";
+      const excerpt = rawSnippet.replace(/<[^>]*>/g, "").trim() || null;
 
-    // タイトル: 直近の h3 テキスト
-    const h3 = $(el).find("h3").text().trim() || $(el).text().trim();
-    if (!h3) return;
-
-    // ソース名: URLのホスト名を使用
-    let sourceName = "不明";
-    try {
-      sourceName = new URL(url).hostname.replace(/^www\./, "");
-    } catch {
-      // URLパース失敗時はデフォルト値のまま
-    }
-
-    // スニペット: リンク要素の後続テキスト
-    const parentBlock = $(el).closest("div");
-    const snippet = parentBlock.find("span").last().text().trim() || null;
-
-    items.push({
-      title: h3,
-      url,
-      sourceName,
-      excerpt: snippet,
+      return {
+        title: r.title,
+        url: r.url,
+        sourceName,
+        excerpt,
+      };
     });
-  });
-
-  // 重複URLを除去
-  const seen = new Set<string>();
-  return items.filter((item) => {
-    if (seen.has(item.url)) return false;
-    seen.add(item.url);
-    return true;
-  });
 };
 
 // メイン処理
@@ -119,27 +84,11 @@ for (const c of allCases) {
 
   for (const buildQuery of queryTemplates) {
     const query = buildQuery(c.case_title_short as string);
-    const searchUrl = buildSearchUrl(query);
 
     console.log(`[commentaries] 検索中: "${query}"`);
 
     try {
-      const res = await fetch(searchUrl, {
-        headers: {
-          "User-Agent": USER_AGENT,
-          Accept: "text/html,application/xhtml+xml",
-          "Accept-Language": "ja,en;q=0.5",
-        },
-      });
-
-      if (!res.ok) {
-        console.log(`[commentaries] 検索失敗 (${res.status}): ${query}`);
-        await sleep(DELAY_MS);
-        continue;
-      }
-
-      const html = await res.text();
-      const items = parseSearchResults(html);
+      const items = await searchCommentaries(query);
       console.log(`[commentaries] ${items.length} 件の結果を検出`);
 
       for (const item of items) {

@@ -73,3 +73,8 @@ CMD ["pnpm", "--filter", "@recourt/ingest", "generate-comparisons"]
 FROM source AS scrape-news
 RUN touch /app/.env /app/apps/ingest/.env
 CMD ["pnpm", "--filter", "@recourt/ingest", "scrape-news"]
+
+# ── review-quality ───────────────────────────────────
+FROM source AS review-quality
+RUN touch /app/.env /app/apps/ingest/.env
+CMD ["pnpm", "--filter", "@recourt/ingest", "review-quality"]

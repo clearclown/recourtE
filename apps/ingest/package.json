@@ -11,6 +11,7 @@
     "generate-comparisons": "tsx --env-file=.env src/generate-opinion-comparisons.ts",
     "scrape-news": "tsx --env-file=.env src/scrape-news.ts",
     "scrape-commentaries": "tsx --env-file=.env src/scrape-commentaries.ts",
+    "review-quality": "tsx --env-file=.env src/review-quality.ts",
     "build": "echo 'no build yet'",
     "lint": "pnpm -w exec biome check .",
     "format": "pnpm -w exec biome format --write .",
@@ -29,6 +30,7 @@
     "ai": "^6.0.71",
     "cheerio": "1.2.0",
     "drizzle-orm": "catalog:",
+    "duck-duck-scrape": "^2.2.7",
     "pdf-parse": "^2.4.5",
     "zod": "^4.3.6"
   },
