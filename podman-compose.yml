@@ -1,7 +1,7 @@
-# 開発用: podman-compose -f podman-compose.yml up
-# 本番用: podman-compose -f podman-compose.prod.yml up -d
+# 開発用: podman-compose up
 # バッチ: podman-compose -f podman-compose.batch.yml run --rm crawler
 #         podman-compose -f podman-compose.batch.yml run --rm ingest
+# 全自動: bash init.sh
 services:
   libsql:
     image: ghcr.io/tursodatabase/libsql-server:latest
@@ -31,77 +31,6 @@ services:
       - TURSO_AUTH_TOKEN=
     depends_on:
       - libsql
-
-  # ── バッチサービス（init.sh から起動） ──
-  crawler:
-    build:
-      context: .
-      containerfile: Containerfile
-      target: crawler
-    env_file: .env
-    environment:
-      - TURSO_DATABASE_URL=http://libsql:8080
-      - TURSO_AUTH_TOKEN=
-    depends_on:
-      - libsql
-    profiles:
-      - batch
-
-  ingest:
-    build:
-      context: .
-      containerfile: Containerfile
-      target: ingest
-    env_file: .env
-    environment:
-      - TURSO_DATABASE_URL=http://libsql:8080
-      - TURSO_AUTH_TOKEN=
-    depends_on:
-      - libsql
-    profiles:
-      - batch
-
-  enrich-judges:
-    build:
-      context: .
-      containerfile: Containerfile
-      target: enrich-judges
-    env_file: .env
-    environment:
-      - TURSO_DATABASE_URL=http://libsql:8080
-      - TURSO_AUTH_TOKEN=
-    depends_on:
-      - libsql
-    profiles:
-      - batch
-
-  generate-comparisons:
-    build:
-      context: .
-      containerfile: Containerfile
-      target: generate-comparisons
-    env_file: .env
-    environment:
-      - TURSO_DATABASE_URL=http://libsql:8080
-      - TURSO_AUTH_TOKEN=
-    depends_on:
-      - libsql
-    profiles:
-      - batch
-
-  scrape-news:
-    build:
-      context: .
-      containerfile: Containerfile
-      target: scrape-news
-    env_file: .env
-    environment:
-      - TURSO_DATABASE_URL=http://libsql:8080
-      - TURSO_AUTH_TOKEN=
-    depends_on:
-      - libsql
-    profiles:
-      - batch
 
 volumes:
   libsql-data:

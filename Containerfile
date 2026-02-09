@@ -8,8 +8,8 @@ RUN corepack enable && corepack prepare pnpm@10.28.1 --activate
 FROM base AS deps
 WORKDIR /app
 
-# better-sqlite3 ビルドに必要
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+# better-sqlite3 ビルドに必要 + crawlee のメモリ監視に procps (ps) が必要
+RUN apt-get update && apt-get install -y python3 make g++ procps && rm -rf /var/lib/apt/lists/*
 
 # pnpm workspace 設定
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./

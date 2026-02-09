@@ -1,38 +1,70 @@
 #!/bin/bash
 # recourtE フルパイプライン実行スクリプト
 # 使い方: bash init.sh
+#
+# 前提:
+#   - .env ファイルが存在すること (cp .env.example .env して編集)
+#   - podman が利用可能であること
 set -e
+
+BATCH="-f podman-compose.batch.yml"
+NET="recourte_default"
 
 echo "=== recourtE パイプライン開始 ==="
 
+# 0. ネットワーク作成（なければ）
+podman network exists "$NET" 2>/dev/null || podman network create "$NET"
+
 # 1. LibSQL起動
-echo "[1/7] LibSQL サーバー起動..."
+echo "[1/8] LibSQL サーバー起動..."
 podman-compose up -d libsql
+echo "       LibSQL 起動待ち..."
 sleep 3
 
 # 2. マイグレーション実行（ホスト側で実行）
-echo "[2/7] マイグレーション実行..."
+echo "[2/8] マイグレーション実行..."
 pnpm --filter @recourt/database migrate
 
+# バッチイメージをビルド
+echo "       バッチイメージをビルド中..."
+podman-compose $BATCH build crawler ingest enrich-judges generate-comparisons scrape-news scrape-commentaries
+
+# バッチ実行用関数: podman run --rm でイメージを直接実行
+# podman-compose run は 1.0.6 で depends_on 衝突バグがあるため回避
+run_batch() {
+  local image="$1"
+  shift
+  podman run --rm \
+    --network "$NET" \
+    --env-file .env \
+    -e TURSO_DATABASE_URL=http://libsql:8080 \
+    -e TURSO_AUTH_TOKEN= \
+    "$image" "$@"
+}
+
 # 3. クローラー実行
-echo "[3/7] クローラー実行..."
-podman-compose run --rm crawler
+echo "[3/8] クローラー実行..."
+run_batch localhost/recourte_crawler
 
 # 4. インジェスト実行
-echo "[4/7] インジェスト実行..."
-podman-compose run --rm ingest
+echo "[4/8] インジェスト実行..."
+run_batch localhost/recourte_ingest
 
 # 5. 裁判官エンリッチメント
-echo "[5/7] 裁判官エンリッチメント実行..."
-podman-compose run --rm enrich-judges
+echo "[5/8] 裁判官エンリッチメント実行..."
+run_batch localhost/recourte_enrich-judges
 
 # 6. 意見比較生成
-echo "[6/7] 意見比較生成..."
-podman-compose run --rm generate-comparisons
+echo "[6/8] 意見比較生成..."
+run_batch localhost/recourte_generate-comparisons
 
-# 7. ニュース・識者コメント収集
-echo "[7/7] ニュース・識者コメント収集..."
-podman-compose run --rm scrape-news
+# 7. ニュース収集
+echo "[7/8] ニュース収集..."
+run_batch localhost/recourte_scrape-news
+
+# 8. 識者コメント収集
+echo "[8/8] 識者コメント収集..."
+run_batch localhost/recourte_scrape-news pnpm --filter @recourt/ingest scrape-commentaries
 
 # フロントエンド起動
 echo "=== フロントエンド起動 ==="

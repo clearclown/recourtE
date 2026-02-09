@@ -1,12 +1,29 @@
+# バッチ処理用 (podman-compose.yml と併用)
+# 使い方:
+#   podman-compose -f podman-compose.batch.yml run --rm crawler
+#   podman-compose -f podman-compose.batch.yml run --rm ingest
+#   bash init.sh  (全パイプライン自動実行)
 services:
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    ports:
+      - "0.0.0.0:8080:8080"
+    volumes:
+      - libsql-data:/var/lib/sqld:z
+    environment:
+      - SQLD_NODE=primary
+
   crawler:
     build:
       context: .
       containerfile: Containerfile
       target: crawler
     env_file: .env
-    volumes:
-      - crawler-storage:/app/apps/crawler/storage:z
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
 
   ingest:
     build:
@@ -14,6 +31,60 @@ services:
       containerfile: Containerfile
       target: ingest
     env_file: .env
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
+
+  enrich-judges:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: enrich-judges
+    env_file: .env
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
+
+  generate-comparisons:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: generate-comparisons
+    env_file: .env
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
+
+  scrape-news:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: scrape-news
+    env_file: .env
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    depends_on:
+      - libsql
+
+  scrape-commentaries:
+    build:
+      context: .
+      containerfile: Containerfile
+      target: scrape-news
+    env_file: .env
+    environment:
+      - TURSO_DATABASE_URL=http://libsql:8080
+      - TURSO_AUTH_TOKEN=
+    command: ["pnpm", "--filter", "@recourt/ingest", "scrape-commentaries"]
+    depends_on:
+      - libsql
 
 volumes:
-  crawler-storage:
+  libsql-data:
